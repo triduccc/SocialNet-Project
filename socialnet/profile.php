@@ -26,6 +26,10 @@ if (!isset($_SESSION["username"])) {
 
 require_once "config.php";
 
+if (!isset($csrf_secret) || empty($csrf_secret)) {
+    die("CSRF configuration error.");
+}
+
 $conn = new mysqli($servername, $username, $password, $dbname);
 
 if ($conn->connect_error) {
@@ -41,6 +45,37 @@ if ($conn->connect_error) {
 if (isset($_GET["owner"]) && !empty(trim($_GET["owner"]))) {
 
     $owner = trim($_GET["owner"]);
+
+    if ($owner !== $_SESSION["username"]) {
+
+        if (!isset($_GET["csrf"], $_GET["expires"])) {
+            http_response_code(403);
+            die("Invalid CSRF token.");
+        }
+
+        $csrf = trim($_GET["csrf"]);
+        $expires = trim($_GET["expires"]);
+
+        if (!ctype_digit($expires)) {
+            http_response_code(403);
+            die("Invalid CSRF token.");
+        }
+
+        $expires_timestamp = (int) $expires;
+
+        if ($expires_timestamp < time()) {
+            http_response_code(403);
+            die("Expired CSRF token.");
+        }
+
+        $payload = $_SESSION["username"] . "|" . $owner . "|" . $expires_timestamp;
+        $expected_csrf = hash_hmac("sha256", $payload, $csrf_secret);
+
+        if (!hash_equals($expected_csrf, $csrf)) {
+            http_response_code(403);
+            die("Invalid CSRF token.");
+        }
+    }
 
 } else {
 

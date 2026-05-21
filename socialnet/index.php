@@ -41,6 +41,10 @@ if ($conn->connect_error) {
 $current_username = $_SESSION["username"];
 $current_fullname = $_SESSION["fullname"];
 
+if (!isset($csrf_secret) || empty($csrf_secret)) {
+    die("CSRF configuration error.");
+}
+
 /*
 |--------------------------------------------------------------------------
 | Get other users
@@ -185,6 +189,15 @@ $result = $stmt->get_result();
 
     <?php while ($row = $result->fetch_assoc()) : ?>
 
+        <?php
+
+        $profile_owner = $row["username"];
+        $profile_expires = time() + 300;
+        $profile_payload = $current_username . "|" . $profile_owner . "|" . $profile_expires;
+        $profile_csrf = hash_hmac("sha256", $profile_payload, $csrf_secret);
+
+        ?>
+
         <div class="user-card">
 
             <p>
@@ -199,7 +212,7 @@ $result = $stmt->get_result();
 
             <a
                 class="profile-link"
-                href="/socialnet/profile.php?owner=<?php echo urlencode($row["username"]); ?>"
+                href="/socialnet/profile.php?owner=<?php echo urlencode($profile_owner); ?>&expires=<?php echo urlencode((string) $profile_expires); ?>&csrf=<?php echo urlencode($profile_csrf); ?>"
             >
                 View Profile
             </a>

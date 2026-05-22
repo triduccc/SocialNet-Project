@@ -6,6 +6,11 @@ error_reporting(E_ALL);
 
 require_once "../socialnet/config.php";
 
+// Ensure a CSRF token exists for the session and form
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 $conn = new mysqli($servername, $username, $password, $dbname);
 
 if ($conn->connect_error) {
@@ -16,41 +21,51 @@ $message = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    $new_username = trim($_POST["username"]);
-    $new_fullname = trim($_POST["fullname"]);
-    $new_password = trim($_POST["password"]);
-
-    if (
-        !empty($new_username) &&
-        !empty($new_fullname) &&
-        !empty($new_password)
-    ) {
-
-        // hash password
-        $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
-
-        $sql = "INSERT INTO account (username, fullname, password)
-                VALUES (?, ?, ?)";
-
-        $stmt = $conn->prepare($sql);
-
-        $stmt->bind_param(
-            "sss",
-            $new_username,
-            $new_fullname,
-            $hashed_password
-        );
-
-        if ($stmt->execute()) {
-            $message = "User created successfully!";
-        } else {
-            $message = "Error: " . $stmt->error;
-        }
-
-        $stmt->close();
-
+    // Verify CSRF token
+    $posted_token = $_POST['csrf_token'] ?? '';
+    if (!hash_equals($_SESSION['csrf_token'] ?? '', $posted_token)) {
+        // Token missing or invalid; reject the request
+        $message = "Invalid CSRF token. Request denied.";
     } else {
-        $message = "All fields are required.";
+
+        $new_username = trim($_POST["username"]);
+        $new_fullname = trim($_POST["fullname"]);
+        $new_password = trim($_POST["password"]);
+
+        if (
+            !empty($new_username) &&
+            !empty($new_fullname) &&
+            !empty($new_password)
+        ) {
+
+            // hash password
+            $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
+
+            $sql = "INSERT INTO account (username, fullname, password)
+                    VALUES (?, ?, ?)";
+
+            $stmt = $conn->prepare($sql);
+
+            $stmt->bind_param(
+                "sss",
+                $new_username,
+                $new_fullname,
+                $hashed_password
+            );
+
+            if ($stmt->execute()) {
+                $message = "User created successfully!";
+                // Regenerate token after successful state change to prevent replay
+                $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+            } else {
+                $message = "Error: " . $stmt->error;
+            }
+
+            $stmt->close();
+
+        } else {
+            $message = "All fields are required.";
+        }
     }
 }
 
@@ -135,7 +150,9 @@ $conn->close();
 
     <h1>Create New User</h1>
 
+
     <form method="POST">
+        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
 
         <input
             type="text"

@@ -40,7 +40,7 @@ if ($conn->connect_error) {
 
 if (isset($_GET["owner"]) && !empty(trim($_GET["owner"]))) {
 
-    $owner = trim($_GET["owner"]);
+    $owner = $_GET["owner"];
 
 } else {
 

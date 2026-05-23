@@ -53,16 +53,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $description = trim($_POST["description"]);
 
     $sql = "UPDATE account
-            SET description = ?
-            WHERE username = ?";
+            SET description = '$description'
+            WHERE username = '$current_username'";
 
-    $stmt = $conn->prepare($sql);
-
-    $stmt->bind_param(
-        "ss",
-        $description,
-        $current_username
-    );
+    $stmt = $conn->query($sql);
 
     if ($stmt->execute()) {
         $message = "Profile updated successfully.";

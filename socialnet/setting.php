@@ -56,15 +56,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             SET description = '$description'
             WHERE username = '$current_username'";
 
-    $stmt = $conn->query($sql);
-
-    if ($stmt->execute()) {
+    if ($conn->query($sql)) {
         $message = "Profile updated successfully.";
     } else {
         $message = "Error updating profile.";
     }
-
-    $stmt->close();
 }
 
 /*

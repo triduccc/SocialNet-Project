@@ -55,15 +55,9 @@ if (isset($_GET["owner"]) && !empty(trim($_GET["owner"]))) {
 
 $sql = "SELECT username, fullname, description
         FROM account
-        WHERE username = ?";
+        WHERE username = '$owner'";
 
-$stmt = $conn->prepare($sql);
-
-$stmt->bind_param("s", $owner);
-
-$stmt->execute();
-
-$result = $stmt->get_result();
+$result = $conn->query($sql);
 
 /*
 |--------------------------------------------------------------------------

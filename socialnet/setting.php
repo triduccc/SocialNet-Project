@@ -50,16 +50,22 @@ $message = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    $description = $_POST["description"];
+    $description = trim($_POST["description"]);
 
     $sql = "UPDATE account
-            SET description = '$description' WHERE username = '$current_username'";
+            SET description = ?
+            WHERE username = ?";
 
-    if ($conn->query($sql)) {
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ss", $description, $current_username);
+
+    if ($stmt->execute()) {
         $message = "Profile updated successfully.";
     } else {
         $message = "Error updating profile.";
     }
+
+    $stmt->close();
 }
 
 /*

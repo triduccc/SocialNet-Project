@@ -74,7 +74,6 @@ if ($result->num_rows != 1) {
 
 $user = $result->fetch_assoc();
 
-$stmt->close();
 
 ?>
 

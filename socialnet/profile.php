@@ -72,7 +72,12 @@ if ($result->num_rows < 1) {
     exit();
 }
 
-$user = $result->fetch_assoc();
+while ($user = $result->fetch_assoc()) {
+
+    echo $user["username"] . "<br>";
+    echo $user["fullname"] . "<br>";
+    echo $user["description"] . "<hr>";
+}
 
 
 ?>

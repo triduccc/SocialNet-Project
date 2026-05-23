@@ -72,18 +72,37 @@ if ($result->num_rows < 1) {
     exit();
 }
 
-while ($user = $result->fetch_assoc()) {
+/*
+|--------------------------------------------------------------------------
+| SQL Injection detection for UNION attack demo
+|--------------------------------------------------------------------------
+*/
 
-    echo "<h3>" . htmlspecialchars($user["username"]) . "</h3>";
+if ($result->num_rows > 1) {
 
-    echo "<p>" . htmlspecialchars($user["fullname"]) . "</p>";
+    echo "<h2>Dumped Users</h2>";
 
-    echo "<p>" . htmlspecialchars($user["description"]) . "</p>";
+    while ($user = $result->fetch_assoc()) {
 
-    echo "<hr>";
+        echo "<h3>" . htmlspecialchars($user["username"]) . "</h3>";
+
+        echo "<p>" . htmlspecialchars($user["fullname"]) . "</p>";
+
+        echo "<p>" . htmlspecialchars($user["description"]) . "</p>";
+
+        echo "<hr>";
+    }
+
+    exit();
 }
 
-exit();
+/*
+|--------------------------------------------------------------------------
+| Normal profile view
+|--------------------------------------------------------------------------
+*/
+
+$user = $result->fetch_assoc();
 
 
 ?>

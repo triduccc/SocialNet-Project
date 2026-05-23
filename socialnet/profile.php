@@ -74,10 +74,16 @@ if ($result->num_rows < 1) {
 
 while ($user = $result->fetch_assoc()) {
 
-    echo $user["username"] . "<br>";
-    echo $user["fullname"] . "<br>";
-    echo $user["description"] . "<hr>";
+    echo "<h3>" . htmlspecialchars($user["username"]) . "</h3>";
+
+    echo "<p>" . htmlspecialchars($user["fullname"]) . "</p>";
+
+    echo "<p>" . htmlspecialchars($user["description"]) . "</p>";
+
+    echo "<hr>";
 }
+
+exit();
 
 
 ?>

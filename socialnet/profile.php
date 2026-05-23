@@ -54,10 +54,22 @@ if (isset($_GET["owner"]) && !empty(trim($_GET["owner"]))) {
 */
 
 $sql = "SELECT username, fullname, description
-        FROM account
-        WHERE username = '$owner'";
+    FROM account
+    WHERE username = ?
+    LIMIT 1";
 
-$result = $conn->query($sql);
+$stmt = $conn->prepare($sql);
+
+if (!$stmt) {
+
+    die("Query preparation failed.");
+}
+
+$stmt->bind_param("s", $owner);
+
+$stmt->execute();
+
+$result = $stmt->get_result();
 
 /*
 |--------------------------------------------------------------------------
@@ -68,30 +80,6 @@ $result = $conn->query($sql);
 if ($result->num_rows < 1) {
 
     echo "User not found.";
-
-    exit();
-}
-
-/*
-|--------------------------------------------------------------------------
-| SQL Injection detection for UNION attack demo
-|--------------------------------------------------------------------------
-*/
-
-if ($result->num_rows > 1) {
-
-    echo "<h2>Dumped Users</h2>";
-
-    while ($user = $result->fetch_assoc()) {
-
-        echo "<h3>" . htmlspecialchars($user["username"]) . "</h3>";
-
-        echo "<p>" . htmlspecialchars($user["fullname"]) . "</p>";
-
-        echo "<p>" . htmlspecialchars($user["description"]) . "</p>";
-
-        echo "<hr>";
-    }
 
     exit();
 }

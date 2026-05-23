@@ -50,7 +50,7 @@ $message = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    $description = trim($_POST["description"]);
+    $description = $_POST["description"];
 
     $sql = "UPDATE account
             SET description = '$description'

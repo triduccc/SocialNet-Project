@@ -65,7 +65,7 @@ $result = $conn->query($sql);
 |--------------------------------------------------------------------------
 */
 
-if ($result->num_rows != 1) {
+if ($result->num_rows < 1) {
 
     echo "User not found.";
 

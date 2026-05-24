@@ -204,7 +204,7 @@ $stmt->close();
             if (!empty($user["description"])) {
 
                 echo nl2br(
-                    htmlspecialchars($user["description"])
+                    $user["description"]
                 );
 
             } else {

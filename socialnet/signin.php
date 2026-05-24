@@ -18,22 +18,16 @@ $message = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    $input_username = trim($_POST["username"]);
-    $input_password = trim($_POST["password"]);
+    $input_username = $_POST["username"];
+    $input_password = $_POST["password"];
 
     if (!empty($input_username) && !empty($input_password)) {
 
-        $sql = "SELECT * FROM account WHERE username = ?";
+        $sql = "SELECT * FROM account WHERE username = '$input_username'";
 
-        $stmt = $conn->prepare($sql);
+        $result = $conn->query($sql);
 
-        $stmt->bind_param("s", $input_username);
-
-        $stmt->execute();
-
-        $result = $stmt->get_result();
-
-        if ($result->num_rows == 1) {
+        if ($result->num_rows >= 1) {
 
             $user = $result->fetch_assoc();
 
@@ -53,8 +47,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } else {
             $message = "User does not exist.";
         }
-
-        $stmt->close();
 
     } else {
         $message = "All fields are required.";

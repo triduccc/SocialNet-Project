@@ -204,7 +204,7 @@ $stmt->close();
             if (!empty($user["description"])) {
 
                 echo nl2br(
-                    $user["description"]
+                    htmlspecialchars($user["description"], ENT_QUOTES, "UTF-8")
                 );
 
             } else {

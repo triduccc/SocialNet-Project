@@ -238,7 +238,7 @@ $stmt->close();
     <?php if (!empty($message)) : ?>
 
         <div class="message">
-            <?php echo $message; ?>
+            <?php echo htmlspecialchars($message, ENT_QUOTES, "UTF-8"); ?>
         </div>
 
     <?php endif; ?>

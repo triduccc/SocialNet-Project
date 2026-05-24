@@ -23,29 +23,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (!empty($input_username) && !empty($input_password)) {
 
-        $sql = "SELECT * FROM account WHERE username = '$input_username'";
+        $input_username = trim($input_username);
+        $input_password = trim($input_password);
 
-        $result = $conn->query($sql);
+        $stmt = $conn->prepare("SELECT id, username, fullname, password FROM account WHERE username = ?");
+        if ($stmt) {
+            $stmt->bind_param("s", $input_username);
+            $stmt->execute();
+            $result = $stmt->get_result();
 
-        if ($result->num_rows >= 1) {
+            if ($result && $result->num_rows >= 1) {
+                $user = $result->fetch_assoc();
 
-            $user = $result->fetch_assoc();
+                if (password_verify($input_password, $user["password"])) {
 
-            if (password_verify($input_password, $user["password"])) {
+                    $_SESSION["username"] = $user["username"];
+                    $_SESSION["fullname"] = $user["fullname"];
+                    $_SESSION["id"] = $user["id"];
 
-                $_SESSION["username"] = $user["username"];
-                $_SESSION["fullname"] = $user["fullname"];
-                $_SESSION["id"] = $user["id"];
+                    header("Location: /socialnet/index.php");
+                    exit();
 
-                header("Location: /socialnet/index.php");
-                exit();
+                } else {
+                    $message = "Invalid password.";
+                }
 
             } else {
-                $message = "Invalid password.";
+                $message = "User does not exist.";
             }
 
+            $stmt->close();
         } else {
-            $message = "User does not exist.";
+            $message = "Internal error.";
         }
 
     } else {
